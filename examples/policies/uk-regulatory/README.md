@@ -62,14 +62,6 @@ opa eval \
   "data.agt_policies.router.applicable_policies"
 ```
 
-## Loading policies in Agent-OS
-
-```python
-from agent_os.policies.schema import PolicyDocument
-
-policy = PolicyDocument.from_yaml("uk-gdpr-data-protection.yaml")
-```
-
 ## Disclaimer
 
 These policies are community-maintained governance starter packs. They are **not certified legal compliance instruments**. Organisations must perform their own compliance assessments with qualified legal and regulatory advisors before deploying in regulated environments.
