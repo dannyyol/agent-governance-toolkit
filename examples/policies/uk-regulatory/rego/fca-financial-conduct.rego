@@ -1,6 +1,6 @@
 # agt-policies-uk - FCA Principles-Based AI Governance (Rego reference)
 # FCA has no AI-specific binding rules as of 2026 — principles-based framework applies.
-# NOT loaded by the Agent-OS Python runtime.
+# Loaded via ACS YAML (fca-financial-conduct.yaml).
 #
 # Input schema:
 #   { "action": "set_price",
@@ -11,10 +11,11 @@ package agt_policies_uk.fca_conduct
 
 import rego.v1
 
+# Match Agent-OS / production Rego: stringify before regex (never coerce to "").
 _output_text := v if {
 	is_string(input.output)
 	v := input.output
-} else := ""
+} else := sprintf("%v", [object.get(input, "output", "")])
 
 pricing_actions := {
 	"set_price", "adjust_rate", "calculate_premium",
@@ -97,4 +98,32 @@ decision := "allow" if {
 	count(deny) == 0
 	count(escalate) == 0
 	count(audit) == 0
+}
+
+
+# Native ACS result adapters
+import data.agt_policies.acs
+
+acs_input_result := result if {
+	legacy := acs.legacy_input(input, "input")
+	denials := deny with input as legacy
+	escalations := escalate with input as legacy
+	audits := audit with input as legacy
+	result := acs.normalize(denials, escalations, audits)
+}
+
+acs_pre_tool_call_result := result if {
+	legacy := acs.legacy_input(input, "pre_tool_call")
+	denials := deny with input as legacy
+	escalations := escalate with input as legacy
+	audits := audit with input as legacy
+	result := acs.normalize(denials, escalations, audits)
+}
+
+acs_output_result := result if {
+	legacy := acs.legacy_input(input, "output")
+	denials := deny with input as legacy
+	escalations := escalate with input as legacy
+	audits := audit with input as legacy
+	result := acs.normalize(denials, escalations, audits)
 }

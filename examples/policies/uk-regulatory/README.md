@@ -11,9 +11,9 @@ automated decision-making, and financial-sector principles-based controls.
 
 | Policy file | Regulation | Authority | Status |
 |---|---|---|---|
-| `uk-gdpr-data-protection.yaml` | UK GDPR + DPA 2018 + DUAA 2025 (transfer/complaints reforms) | ICO | Binding |
-| `ico-automated-decisions.yaml` | UK GDPR Arts. 22A–22D (DUAA 2025 s.80, in force 5 Feb 2026) | ICO | Binding; ICO ADM guidance draft (final expected summer 2026) |
-| `fca-financial-conduct.yaml` | FCA Handbook PRIN 2A (Consumer Duty), SM&CR | FCA | Principles-based — no AI-specific binding rules as of 2026 |
+| `uk-gdpr-data-protection` | UK GDPR + DPA 2018 + DUAA 2025 (transfer/complaints reforms) | ICO | Binding |
+| `ico-automated-decisions` | UK GDPR Arts. 22A–22D (DUAA 2025 s.80, in force 5 Feb 2026) | ICO | Binding; ICO ADM guidance draft (final expected summer 2026) |
+| `fca-financial-conduct` | FCA Handbook PRIN 2A (Consumer Duty), SM&CR | FCA | Principles-based — no AI-specific binding rules as of 2026 |
 
 ## Regulatory context (2026)
 
@@ -24,7 +24,7 @@ automated decision-making, and financial-sector principles-based controls.
 
 ## What these rules detect (and what they do not)
 
-Output-side rules match intent phrases (for example "store PII unencrypted", "don't report the breach", "no human review"). YAML policies use `block` for review/hold tiers (the Agent-OS schema supports `allow`, `deny`, `audit`, and `block` only); the Rego reference implementations may use an independent `escalate` decision tier for OPA pipelines. They catch an agent that narrates or proposes a violation in its output; they do not observe the underlying system action. Treat them as a starting point, pair them with real action-level enforcement, and run your own compliance assessment.
+Output-side rules match intent phrases (for example "store PII unencrypted", "don't report the breach", "no human review"). They catch an agent that narrates or proposes a violation in its output; they do not observe the underlying system action, so they are detection heuristics for an examples pack, not compliance controls. Treat them as a starting point, pair them with real action-level enforcement, and run your own compliance assessment.
 
 ## Not covered (known gaps)
 
@@ -41,9 +41,21 @@ Material obligations the pack does not represent yet:
 
 Universal agent-safety controls (prompt_injection, pii_leakage, tool_permissions, human_approval, model_routing) apply to all agents and are evaluated via the shared jurisdiction router in `../african-regulatory/rego/jurisdiction-router.rego`. These UK national packs add jurisdiction-specific regulatory controls, selected by `context.customer_country = "GB"`.
 
-## Rego
+## Native ACS and Rego
 
-`rego/` holds OPA reference implementations (NOT loaded by the Agent-OS Python runtime). Each pack exposes `data.agt_policies_uk.<pack>.decision`. The shared router maps `GB` to `uk_gdpr`, `ico_adm`, and `fca_conduct`.
+Each YAML file is a native ACS manifest bound to its package under `rego/`.
+The shared ACS result adapter maps deny, escalate, audit, and allow outcomes to
+the runtime result contract. The jurisdiction router maps `GB` to `uk_gdpr`,
+`ico_adm`, and `fca_conduct`.
+
+Output text is stringified before regex evaluation (Agent-OS / production Rego practice) so structured `output` cannot evade phrase rules. Transfer adequacy uses pack-owned defaults overridable only via `data.config.uk_gdpr.*` (same deployer-config pattern as African agent-safety packs). Caller-set `adequacy_covered` / `safeguards_in_place` / DPF flags on `input.params` are ignored. The United States is not in the default adequacy set; US transfers are allowed only when the platform sets both `eu_us_data_privacy_framework` and `supplementary_measures` (mirrors `agent-os/templates/policies/gdpr.yaml`).
+
+```python
+from agent_control_specification import AgentControl
+
+runtime = AgentControl.from_path(str("uk-gdpr-data-protection.yaml"))
+result = runtime.evaluate("output", snapshot)
+```
 
 To evaluate with OPA:
 

@@ -18,6 +18,13 @@ test_deny_consumer_harm if {
 	}
 }
 
+test_deny_structured_output_consumer_harm if {
+	policy.decision == "deny" with input as {
+		"action": "draft_message",
+		"output": {"text": "Hide fees from the customer in this renewal letter."},
+	}
+}
+
 test_deny_fair_value_bypass if {
 	policy.decision == "deny" with input as {
 		"action": "draft_policy",

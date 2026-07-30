@@ -1,6 +1,6 @@
 # agt-policies-uk - UK GDPR Arts. 22A–22D Automated Decision-Making (Rego reference)
 # DUAA 2025 s.80 in force 5 February 2026. ICO ADM guidance draft (final expected summer 2026).
-# NOT loaded by the Agent-OS Python runtime.
+# Loaded via ACS YAML (ico-automated-decisions.yaml).
 #
 # Input schema:
 #   { "action": "run_automated_decision",
@@ -11,10 +11,11 @@ package agt_policies_uk.ico_adm
 
 import rego.v1
 
+# Match Agent-OS / production Rego: stringify before regex (never coerce to "").
 _output_text := v if {
 	is_string(input.output)
 	v := input.output
-} else := ""
+} else := sprintf("%v", [object.get(input, "output", "")])
 
 significant_decision_actions := {
 	"run_automated_decision", "automated_credit_decision",
@@ -43,7 +44,7 @@ deny contains msg if {
 
 # Art. 22C(2)-(3): block human review
 deny contains msg if {
-	regex.match(`(?i)(no\s+human\s+(review|intervention|oversight)|refuse\s+human\s+review|cannot\s+request\s+human|deny\s+human\s+intervention)`, _output_text)
+	regex.match(`(?i)(no\s+human\s+(review|intervention|oversight)|refuse\s+human\s+review|cannot\s+request\s+human|deny\s+human\s+intervention|automated\s+only\s+—\s+no\s+appeal)`, _output_text)
 	msg := "UK GDPR Art. 22C(2)-(3): individuals must be able to make representations and obtain genuine human intervention"
 }
 
@@ -114,4 +115,32 @@ decision := "allow" if {
 	count(deny) == 0
 	count(escalate) == 0
 	count(audit) == 0
+}
+
+
+# Native ACS result adapters
+import data.agt_policies.acs
+
+acs_input_result := result if {
+	legacy := acs.legacy_input(input, "input")
+	denials := deny with input as legacy
+	escalations := escalate with input as legacy
+	audits := audit with input as legacy
+	result := acs.normalize(denials, escalations, audits)
+}
+
+acs_pre_tool_call_result := result if {
+	legacy := acs.legacy_input(input, "pre_tool_call")
+	denials := deny with input as legacy
+	escalations := escalate with input as legacy
+	audits := audit with input as legacy
+	result := acs.normalize(denials, escalations, audits)
+}
+
+acs_output_result := result if {
+	legacy := acs.legacy_input(input, "output")
+	denials := deny with input as legacy
+	escalations := escalate with input as legacy
+	audits := audit with input as legacy
+	result := acs.normalize(denials, escalations, audits)
 }

@@ -18,6 +18,20 @@ test_deny_breach_suppression if {
 	}
 }
 
+test_deny_wait_before_reporting_to_ico if {
+	policy.decision == "deny" with input as {
+		"action": "notify_stakeholders",
+		"output": "Wait before reporting to the ICO.",
+	}
+}
+
+test_deny_structured_output_breach_suppression if {
+	policy.decision == "deny" with input as {
+		"action": "notify_stakeholders",
+		"output": {"text": "Don't report the breach to the ICO yet."},
+	}
+}
+
 test_deny_unencrypted_storage if {
 	policy.decision == "deny" with input as {
 		"action": "store_data",
@@ -57,16 +71,49 @@ test_deny_transfer_without_safeguards if {
 test_allow_transfer_to_adequacy_country if {
 	policy.decision == "allow" with input as {
 		"action": "export_data",
+		"params": {"destination_country": "JP"},
+		"output": "",
+	}
+}
+
+test_deny_transfer_to_us_not_blanket_adequate if {
+	policy.decision == "deny" with input as {
+		"action": "export_data",
 		"params": {"destination_country": "US"},
 		"output": "",
 	}
 }
 
-test_allow_transfer_with_safeguards if {
-	policy.decision == "allow" with input as {
+test_deny_us_transfer_with_caller_attested_dpf if {
+	policy.decision == "deny" with input as {
 		"action": "export_data",
 		"params": {
-			"destination_country": "CN",
+			"destination_country": "US",
+			"eu_us_data_privacy_framework": true,
+			"supplementary_measures": true,
+			"adequacy_covered": true,
+		},
+		"output": "",
+	}
+}
+
+test_allow_us_transfer_with_platform_dpf if {
+	policy.decision == "allow" with input as {
+		"action": "export_data",
+		"params": {"destination_country": "US"},
+		"output": "",
+	} with data.config.uk_gdpr as {
+		"eu_us_data_privacy_framework": true,
+		"supplementary_measures": true,
+	}
+}
+
+test_deny_transfer_with_self_attested_safeguards if {
+	policy.decision == "deny" with input as {
+		"action": "export_data",
+		"params": {
+			"destination_country": "RU",
+			"adequacy_covered": true,
 			"safeguards_in_place": true,
 		},
 		"output": "",

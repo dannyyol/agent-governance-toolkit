@@ -25,6 +25,20 @@ test_deny_refuse_human_review if {
 	}
 }
 
+test_deny_automated_only_no_appeal if {
+	policy.decision == "deny" with input as {
+		"action": "respond",
+		"output": "This decision is automated only — no appeal.",
+	}
+}
+
+test_deny_structured_output_refuse_human_review if {
+	policy.decision == "deny" with input as {
+		"action": "respond",
+		"output": {"text": "No human review is available for this outcome."},
+	}
+}
+
 test_deny_block_contest_right if {
 	policy.decision == "deny" with input as {
 		"action": "respond",

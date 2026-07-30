@@ -1,22 +1,28 @@
 # agt-policies-uk - UK GDPR + DPA 2018 (Rego reference)
 # Enforcing authority: ICO. DUAA 2025 transfer and complaints reforms in force Feb/Jun 2026.
-# NOT loaded by the Agent-OS Python runtime. OPA uses Go RE2 (no lookbehind/lookahead).
+# Loaded via ACS YAML (uk-gdpr-data-protection.yaml). OPA uses Go RE2 (no lookbehind/lookahead).
 #
 # Input schema:
 #   { "action": "export_data",
-#     "params": { "destination_country": "US", "adequacy_covered": false,
-#                 "safeguards_in_place": false, "record_count": 500 },
+#     "params": { "destination_country": "JP", "record_count": 500 },
 #     "output": "agent output text",
 #     "context": { } }
+#
+# Config (override via data.config.uk_gdpr.* — platform/deployer only):
+#   adequacy_countries — replace illustrative default set (US is never a default)
+#   eu_us_data_privacy_framework — true when org is UK Extension to EU-US DPF certified
+#   supplementary_measures — true when supplementary measures are documented
+# Caller-set input.params adequacy/DPF/safeguards flags are ignored for transfer denies.
 
 package agt_policies_uk.uk_gdpr
 
 import rego.v1
 
+# Match Agent-OS / production Rego: stringify before regex (never coerce to "").
 _output_text := v if {
 	is_string(input.output)
 	v := input.output
-} else := ""
+} else := sprintf("%v", [object.get(input, "output", "")])
 
 transfer_actions := {
 	"send_to_external", "export_data", "upload_to_cloud",
@@ -38,14 +44,34 @@ pii_update_actions := {
 	"change_personal", "erase_personal_data",
 }
 
-# UK adequacy-covered destinations (illustrative — verify against current gov.uk list)
-adequacy_countries := {
-	"GB", "EU", "EEA", "US", "JP", "KR", "CA", "NZ", "CH", "IL", "UY",
+# Illustrative UK adequacy set (verify against current gov.uk list).
+# US omitted from defaults — DPF-certified bridge only (see _us_transfer_allowed).
+_default_adequacy_countries := {
+	"GB", "EU", "EEA", "JP", "KR", "CA", "NZ", "CH", "IL", "UY",
+}
+
+adequacy_countries := s if {
+	s := data.config.uk_gdpr.adequacy_countries
+} else := _default_adequacy_countries
+
+# Platform-set only — mirrors agent-os/templates/policies/gdpr.yaml us_data_transfer.
+_us_transfer_allowed if {
+	data.config.uk_gdpr.eu_us_data_privacy_framework == true
+	data.config.uk_gdpr.supplementary_measures == true
+}
+
+_destination_permitted if {
+	input.params.destination_country in adequacy_countries
+}
+
+_destination_permitted if {
+	input.params.destination_country == "US"
+	_us_transfer_allowed
 }
 
 # Art. 33: block breach suppression
 deny contains msg if {
-	regex.match(`(?i)(don'?t\s+(report|notify|disclose)|hide\s+(the\s+)?(breach|incident)|suppress\s+(the\s+)?(breach|notification)|delay\s+(breach|incident)\s+(report|notification))`, _output_text)
+	regex.match(`(?i)(don'?t\s+(report|notify|disclose)|hide\s+(the\s+)?(breach|incident)|suppress\s+(the\s+)?(breach|notification)|delay\s+(breach|incident)\s+(report|notification)|wait\s+before\s+report(ing)?\s+(to\s+)?(the\s+)?ico)`, _output_text)
 	msg := "UK GDPR Art. 33: where a breach is likely to result in a risk to rights and freedoms, notify the ICO without undue delay and, where feasible, within 72 hours — agent cannot suppress or delay notification"
 }
 
@@ -79,13 +105,11 @@ deny contains msg if {
 	msg := "UK GDPR: National Insurance number detected in agent output — blocked to prevent identity exposure"
 }
 
-# Art. 44–46: block transfer without adequacy or safeguards
+# Art. 44–46: block transfer without adequacy / platform-set DPF (never caller-attested)
 deny contains msg if {
 	input.action in transfer_actions
 	input.params.destination_country
-	not input.params.destination_country in adequacy_countries
-	not input.params.adequacy_covered == true
-	not input.params.safeguards_in_place == true
+	not _destination_permitted
 	msg := sprintf(
 		"UK GDPR Art. 44–46: transfer to '%v' blocked — requires adequacy, IDTA/UK Addendum safeguards, and data protection test (DUAA 'not materially lower' standard)",
 		[input.params.destination_country],
@@ -120,7 +144,7 @@ escalate contains msg if {
 	msg := "UK GDPR Art. 5(1)(b): personal data must not be further processed incompatibly — verify compatible purpose or DUAA recognised legitimate interests before repurposing"
 }
 
-# Art. 44–46: escalate transfer action when destination/safeguards not specified
+# Art. 44–46: escalate transfer action when destination not specified
 escalate contains msg if {
 	input.action in transfer_actions
 	not input.params.destination_country
@@ -168,4 +192,32 @@ decision := "allow" if {
 	count(deny) == 0
 	count(escalate) == 0
 	count(audit) == 0
+}
+
+
+# Native ACS result adapters
+import data.agt_policies.acs
+
+acs_input_result := result if {
+	legacy := acs.legacy_input(input, "input")
+	denials := deny with input as legacy
+	escalations := escalate with input as legacy
+	audits := audit with input as legacy
+	result := acs.normalize(denials, escalations, audits)
+}
+
+acs_pre_tool_call_result := result if {
+	legacy := acs.legacy_input(input, "pre_tool_call")
+	denials := deny with input as legacy
+	escalations := escalate with input as legacy
+	audits := audit with input as legacy
+	result := acs.normalize(denials, escalations, audits)
+}
+
+acs_output_result := result if {
+	legacy := acs.legacy_input(input, "output")
+	denials := deny with input as legacy
+	escalations := escalate with input as legacy
+	audits := audit with input as legacy
+	result := acs.normalize(denials, escalations, audits)
 }
