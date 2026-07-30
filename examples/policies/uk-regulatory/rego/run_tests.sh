@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
 # agt-policies-uk - OPA test runner for UK regulatory Rego policies.
 # Loads UK packs plus the shared jurisdiction router from african-regulatory.
 
