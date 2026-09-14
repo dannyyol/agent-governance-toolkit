@@ -99,9 +99,9 @@ deny contains msg if {
 	msg := "UK GDPR: NHS number detected in agent output — blocked to prevent health identity exposure"
 }
 
-# National Insurance number in output
+# National Insurance number in output (compact AB123456C or HMRC-spaced AB 12 34 56 C)
 deny contains msg if {
-	regex.match(`(?i)(national\s+insurance|ni\s+number)[\s:=]{0,5}[A-Z]{2}[0-9]{6}[A-D]`, _output_text)
+	regex.match(`(?i)(national\s+insurance|ni)\s*(number|no\.?)?[\s:=]{0,5}[A-Z]{2}[\s-]?[0-9]{2}[\s-]?[0-9]{2}[\s-]?[0-9]{2}[\s-]?[A-D]`, _output_text)
 	msg := "UK GDPR: National Insurance number detected in agent output — blocked to prevent identity exposure"
 }
 

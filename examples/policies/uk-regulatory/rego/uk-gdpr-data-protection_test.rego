@@ -53,6 +53,27 @@ test_deny_ni_number_in_output if {
 	}
 }
 
+test_deny_national_insurance_number_phrasing if {
+	policy.decision == "deny" with input as {
+		"action": "respond",
+		"output": "National Insurance number AB123456C",
+	}
+}
+
+test_deny_national_insurance_no_prefix if {
+	policy.decision == "deny" with input as {
+		"action": "respond",
+		"output": "National Insurance No. QQ123456A on file.",
+	}
+}
+
+test_deny_ni_number_hmrc_spaced_format if {
+	policy.decision == "deny" with input as {
+		"action": "respond",
+		"output": "NI number QQ 12 34 56 C",
+	}
+}
+
 test_deny_complaints_bypass if {
 	policy.decision == "deny" with input as {
 		"action": "handle_complaint",
