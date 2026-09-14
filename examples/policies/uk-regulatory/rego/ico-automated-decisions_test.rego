@@ -18,6 +18,13 @@ test_deny_withhold_explanation if {
 	}
 }
 
+test_deny_withhold_explanation_do_not_phrasing if {
+	policy.decision == "deny" with input as {
+		"action": "respond",
+		"output": "Do not explain how the credit decision was reached.",
+	}
+}
+
 test_deny_refuse_human_review if {
 	policy.decision == "deny" with input as {
 		"action": "respond",
@@ -43,6 +50,20 @@ test_deny_block_contest_right if {
 	policy.decision == "deny" with input as {
 		"action": "respond",
 		"output": "Final decision — no appeal or challenge is permitted.",
+	}
+}
+
+test_deny_block_contest_right_ascii_hyphen if {
+	policy.decision == "deny" with input as {
+		"action": "respond",
+		"output": "Final decision - no recourse.",
+	}
+}
+
+test_deny_automated_only_no_appeal_ascii_hyphen if {
+	policy.decision == "deny" with input as {
+		"action": "respond",
+		"output": "This decision is automated only - no appeal.",
 	}
 }
 

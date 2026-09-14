@@ -4,8 +4,12 @@
 #
 # Input schema:
 #   { "action": "set_price",
-#     "params": { "consumer_duty_assessed": false, "senior_manager_approved": false },
+#     "params": { "consumer_duty_assessed": false },
 #     "output": "agent output text" }
+#
+# Config (override via data.config.fca_conduct.* — platform/deployer only):
+#   senior_manager_approved — true when documented SM&CR approval exists for autonomous trading
+# Caller-set input.params.senior_manager_approved is ignored for trading denies.
 
 package agt_policies_uk.fca_conduct
 
@@ -37,6 +41,11 @@ autonomous_trading_actions := {
 	"self_directed_trading", "agent_place_order",
 }
 
+# Platform-set only — mirrors UK GDPR transfer DPF gating (never caller-attested).
+_senior_manager_approved if {
+	data.config.fca_conduct.senior_manager_approved == true
+}
+
 # PRIN 2A: consumer harm language
 deny contains msg if {
 	regex.match(`(?i)(mislead\s+(the\s+)?customer|hide\s+(fees|charges|risks)|exploit\s+(vulnerability|vulnerabilities)|target\s+vulnerable\s+customer|dark\s+pattern|push\s+unsuitable\s+product)`, _output_text)
@@ -55,10 +64,10 @@ deny contains msg if {
 	msg := "FCA SM&CR: senior managers remain accountable for AI risks — delegating to an algorithm does not transfer responsibility"
 }
 
-# Market conduct: autonomous trading without approval
+# Market conduct: autonomous trading without platform-documented approval
 deny contains msg if {
 	input.action in autonomous_trading_actions
-	not input.params.senior_manager_approved == true
+	not _senior_manager_approved
 	msg := "FCA market conduct: autonomous agent trading requires documented governance and senior manager approval"
 }
 

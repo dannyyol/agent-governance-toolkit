@@ -71,13 +71,13 @@ _destination_permitted if {
 
 # Art. 33: block breach suppression
 deny contains msg if {
-	regex.match(`(?i)(don'?t\s+(report|notify|disclose)|hide\s+(the\s+)?(breach|incident)|suppress\s+(the\s+)?(breach|notification)|delay\s+(breach|incident)\s+(report|notification)|wait\s+before\s+report(ing)?\s+(to\s+)?(the\s+)?ico)`, _output_text)
+	regex.match(`(?i)((don'?t|do\s+not)\s+(report|notify|disclose)|hide\s+(the\s+)?(breach|incident)|suppress\s+(the\s+)?(breach|notification)|delay\s+(breach|incident)\s+(report|notification)|wait\s+before\s+report(ing)?\s+(to\s+)?(the\s+)?ico)`, _output_text)
 	msg := "UK GDPR Art. 33: where a breach is likely to result in a risk to rights and freedoms, notify the ICO without undue delay and, where feasible, within 72 hours — agent cannot suppress or delay notification"
 }
 
 # Art. 34: block suppression of individual notification
 deny contains msg if {
-	regex.match(`(?i)(don'?t\s+(tell|inform|notify)\s+(the\s+)?(data\s+subject|individual|customer|user)|hide\s+(breach|incident)\s+from\s+(customer|user|individual))`, _output_text)
+	regex.match(`(?i)((don'?t|do\s+not)\s+(tell|inform|notify)\s+(the\s+)?(data\s+subject|individual|customer|user)|hide\s+(breach|incident)\s+from\s+(customer|user|individual))`, _output_text)
 	msg := "UK GDPR Art. 34: individuals must be informed without undue delay where breach poses high risk"
 }
 
@@ -95,13 +95,13 @@ deny contains msg if {
 
 # NHS number in output (compact/spaced/hyphenated; NHS or full "National Health Service")
 deny contains msg if {
-	regex.match(`(?i)(national\s+health\s+service|nhs)\s*(number|no\.?)?[\s:=]{0,5}[0-9]{3}[\s-]?[0-9]{3}[\s-]?[0-9]{4}`, _output_text)
+	regex.match(`(?i)(national\s+health\s+service|nhs)\s*(number|no\.?|ref(?:erence)?)?(?:\s+(?:is|of))?[\s:=]{0,5}[0-9]{3}[\s-]?[0-9]{3}[\s-]?[0-9]{4}`, _output_text)
 	msg := "UK GDPR: NHS number detected in agent output — blocked to prevent health identity exposure"
 }
 
 # National Insurance number in output (compact AB123456C or HMRC-spaced AB 12 34 56 C)
 deny contains msg if {
-	regex.match(`(?i)(national\s+insurance|ni)\s*(number|no\.?)?[\s:=]{0,5}[A-Z]{2}[\s-]?[0-9]{2}[\s-]?[0-9]{2}[\s-]?[0-9]{2}[\s-]?[A-D]`, _output_text)
+	regex.match(`(?i)(national\s+insurance|ni)\s*(number|no\.?)?(?:\s+(?:is|of))?[\s:=]{0,5}[A-Z]{2}[\s-]?[0-9]{2}[\s-]?[0-9]{2}[\s-]?[0-9]{2}[\s-]?[A-D]`, _output_text)
 	msg := "UK GDPR: National Insurance number detected in agent output — blocked to prevent identity exposure"
 }
 

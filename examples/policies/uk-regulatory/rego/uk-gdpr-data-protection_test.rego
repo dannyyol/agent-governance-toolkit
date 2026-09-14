@@ -18,6 +18,13 @@ test_deny_breach_suppression if {
 	}
 }
 
+test_deny_breach_suppression_do_not_phrasing if {
+	policy.decision == "deny" with input as {
+		"action": "notify_stakeholders",
+		"output": "Do not report the breach to the ICO",
+	}
+}
+
 test_deny_wait_before_reporting_to_ico if {
 	policy.decision == "deny" with input as {
 		"action": "notify_stakeholders",
@@ -29,6 +36,20 @@ test_deny_structured_output_breach_suppression if {
 	policy.decision == "deny" with input as {
 		"action": "notify_stakeholders",
 		"output": {"text": "Don't report the breach to the ICO yet."},
+	}
+}
+
+test_deny_individual_notification_suppression if {
+	policy.decision == "deny" with input as {
+		"action": "notify_stakeholders",
+		"output": "Don't inform the data subject about the breach.",
+	}
+}
+
+test_deny_individual_notification_suppression_do_not_phrasing if {
+	policy.decision == "deny" with input as {
+		"action": "notify_stakeholders",
+		"output": "Do not inform the data subject about the breach",
 	}
 }
 
@@ -67,6 +88,20 @@ test_deny_nhs_number_spaced_format if {
 	}
 }
 
+test_deny_nhs_number_with_filler_is if {
+	policy.decision == "deny" with input as {
+		"action": "respond",
+		"output": "NHS number is 943-476-5919",
+	}
+}
+
+test_deny_nhs_number_with_ref_label if {
+	policy.decision == "deny" with input as {
+		"action": "respond",
+		"output": "Patient NHS ref 943 476 5919",
+	}
+}
+
 test_deny_ni_number_in_output if {
 	policy.decision == "deny" with input as {
 		"action": "respond",
@@ -92,6 +127,20 @@ test_deny_ni_number_hmrc_spaced_format if {
 	policy.decision == "deny" with input as {
 		"action": "respond",
 		"output": "NI number QQ 12 34 56 C",
+	}
+}
+
+test_deny_ni_number_with_filler_is if {
+	policy.decision == "deny" with input as {
+		"action": "respond",
+		"output": "NI number is QQ123456A",
+	}
+}
+
+test_deny_national_insurance_with_filler_is if {
+	policy.decision == "deny" with input as {
+		"action": "respond",
+		"output": "National Insurance is AB123456C",
 	}
 }
 

@@ -38,19 +38,19 @@ deployment_actions := {
 
 # Art. 22C(1): withhold explanation
 deny contains msg if {
-	regex.match(`(?i)(don'?t\s+explain|no\s+explanation|withhold\s+(the\s+)?(reason|rationale)|hide\s+how\s+(the\s+)?decision|refuse\s+to\s+explain)`, _output_text)
+	regex.match(`(?i)((don'?t|do\s+not)\s+explain|no\s+explanation|withhold\s+(the\s+)?(reason|rationale)|hide\s+how\s+(the\s+)?decision|refuse\s+to\s+explain)`, _output_text)
 	msg := "UK GDPR Art. 22C(1): individuals must receive decision-specific information explaining how and why the outcome was reached"
 }
 
 # Art. 22C(2)-(3): block human review
 deny contains msg if {
-	regex.match(`(?i)(no\s+human\s+(review|intervention|oversight)|refuse\s+human\s+review|cannot\s+request\s+human|deny\s+human\s+intervention|automated\s+only\s+—\s+no\s+appeal)`, _output_text)
+	regex.match(`(?i)(no\s+human\s+(review|intervention|oversight)|refuse\s+human\s+review|cannot\s+request\s+human|deny\s+human\s+intervention|automated\s+only\s*[—\-–]\s*no\s+appeal)`, _output_text)
 	msg := "UK GDPR Art. 22C(2)-(3): individuals must be able to make representations and obtain genuine human intervention"
 }
 
 # Art. 22C(4): block contest right
 deny contains msg if {
-	regex.match(`(?i)(cannot\s+contest|no\s+(right\s+to\s+)?(appeal|challenge)|final\s+decision\s+—\s+no\s+recourse|waive\s+(the\s+)?right\s+to\s+contest)`, _output_text)
+	regex.match(`(?i)(cannot\s+contest|no\s+(right\s+to\s+)?(appeal|challenge)|final\s+decision\s*[—\-–]\s*no\s+recourse|waive\s+(the\s+)?right\s+to\s+contest)`, _output_text)
 	msg := "UK GDPR Art. 22C(4): individuals must be able to contest the decision through an accessible process"
 }
 

@@ -42,17 +42,25 @@ test_deny_delegate_accountability if {
 test_deny_autonomous_trading_without_approval if {
 	policy.decision == "deny" with input as {
 		"action": "autonomous_trade",
-		"params": {"senior_manager_approved": false},
+		"params": {},
 		"output": "",
 	}
 }
 
-test_allow_autonomous_trading_with_approval if {
-	policy.decision == "allow" with input as {
+test_deny_autonomous_trading_with_caller_attested_approval if {
+	policy.decision == "deny" with input as {
 		"action": "autonomous_trade",
 		"params": {"senior_manager_approved": true},
 		"output": "",
 	}
+}
+
+test_allow_autonomous_trading_with_platform_approval if {
+	policy.decision == "allow" with input as {
+		"action": "autonomous_trade",
+		"params": {},
+		"output": "",
+	} with data.config.fca_conduct as {"senior_manager_approved": true}
 }
 
 test_escalate_pricing_without_consumer_duty_assessment if {

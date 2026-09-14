@@ -1,3 +1,10 @@
+# --- UK regulatory policy terms ---
+Caldicott
+DSPT
+DUAA
+PECR
+PRIN
+SYSC
 # UK Regulatory Policy Pack
 
 Reference Policy-as-Code for governing AI agents under UK regulation: data protection,
@@ -77,3 +84,81 @@ opa eval \
 ## Disclaimer
 
 These policies are community-maintained governance starter packs. They are **not certified legal compliance instruments**. Organisations must perform their own compliance assessments with qualified legal and regulatory advisors before deploying in regulated environments.
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
+# FCA Consumer Duty (PRIN 2A) + SM&CR — ACS manifest (Rego enforcement in rego/).
+# Enforcing authority: Financial Conduct Authority (FCA).
+# Community-maintained governance starter policy. NOT a certified legal compliance instrument.
+agent_control_specification_version: 0.3.1-beta
+metadata:
+  name: fca-financial-conduct
+  version: "1.0"
+extends: []
+policies:
+  fca_financial_conduct:
+    type: rego
+    bundle: rego
+intervention_points:
+  input:
+    policy_target: $.input.body
+    policy:
+      id: fca_financial_conduct
+      query: data.agt_policies_uk.fca_conduct.acs_input_result
+  output:
+    policy_target: $.output.content
+    policy:
+      id: fca_financial_conduct
+      query: data.agt_policies_uk.fca_conduct.acs_output_result
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
+# UK GDPR Arts. 22A–22D (DUAA 2025 s.80) — ACS manifest (Rego enforcement in rego/).
+# Enforcing authority: Information Commissioner's Office (ICO).
+# Community-maintained governance starter policy. NOT a certified legal compliance instrument.
+agent_control_specification_version: 0.3.1-beta
+metadata:
+  name: ico-automated-decisions
+  version: "1.0"
+extends: []
+policies:
+  ico_automated_decisions:
+    type: rego
+    bundle: rego
+intervention_points:
+  input:
+    policy_target: $.input.body
+    policy:
+      id: ico_automated_decisions
+      query: data.agt_policies_uk.ico_adm.acs_input_result
+  output:
+    policy_target: $.output.content
+    policy:
+      id: ico_automated_decisions
+      query: data.agt_policies_uk.ico_adm.acs_output_result
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
+# UK GDPR + DPA 2018 + DUAA 2025 — ACS manifest (Rego enforcement in rego/).
+# Enforcing authority: Information Commissioner's Office (ICO).
+# Community-maintained governance starter policy. NOT a certified legal compliance instrument.
+agent_control_specification_version: 0.3.1-beta
+metadata:
+  name: uk-gdpr-data-protection
+  version: "1.0"
+extends: []
+policies:
+  uk_gdpr_data_protection:
+    type: rego
+    bundle: rego
+intervention_points:
+  input:
+    policy_target: $.input.body
+    policy:
+      id: uk_gdpr_data_protection
+      query: data.agt_policies_uk.uk_gdpr.acs_input_result
+  output:
+    policy_target: $.output.content
+    policy:
+      id: uk_gdpr_data_protection
+      query: data.agt_policies_uk.uk_gdpr.acs_output_result
