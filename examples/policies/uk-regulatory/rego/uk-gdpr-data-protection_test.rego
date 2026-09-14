@@ -46,6 +46,27 @@ test_deny_nhs_number_in_output if {
 	}
 }
 
+test_deny_national_health_service_number_phrasing if {
+	policy.decision == "deny" with input as {
+		"action": "respond",
+		"output": "National Health Service number 943-476-5919",
+	}
+}
+
+test_deny_nhs_number_bare_prefix if {
+	policy.decision == "deny" with input as {
+		"action": "respond",
+		"output": "NHS 943-476-5919",
+	}
+}
+
+test_deny_nhs_number_spaced_format if {
+	policy.decision == "deny" with input as {
+		"action": "respond",
+		"output": "NHS No. 943 476 5919",
+	}
+}
+
 test_deny_ni_number_in_output if {
 	policy.decision == "deny" with input as {
 		"action": "respond",

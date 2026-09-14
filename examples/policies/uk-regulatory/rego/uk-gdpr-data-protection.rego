@@ -93,9 +93,9 @@ deny contains msg if {
 	msg := "DPA 2018 s.164A (DUAA): data subjects must be able to raise data protection complaints with the controller (30-day acknowledgment) before ICO escalation"
 }
 
-# NHS number in output
+# NHS number in output (compact/spaced/hyphenated; NHS or full "National Health Service")
 deny contains msg if {
-	regex.match(`(?i)nhs\s*(number|no\.?)[\s:=]{0,5}[0-9]{3}[\s-]?[0-9]{3}[\s-]?[0-9]{4}`, _output_text)
+	regex.match(`(?i)(national\s+health\s+service|nhs)\s*(number|no\.?)?[\s:=]{0,5}[0-9]{3}[\s-]?[0-9]{3}[\s-]?[0-9]{4}`, _output_text)
 	msg := "UK GDPR: NHS number detected in agent output — blocked to prevent health identity exposure"
 }
 
