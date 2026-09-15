@@ -39,14 +39,14 @@ Material obligations the pack does not represent yet:
 
 ## Two layers
 
-Universal agent-safety controls (prompt_injection, pii_leakage, tool_permissions, human_approval, model_routing) apply to all agents and are evaluated via the shared jurisdiction router in `../african-regulatory/rego/jurisdiction-router.rego`. These UK national packs add jurisdiction-specific regulatory controls, selected by `context.customer_country = "GB"`.
+Universal agent-safety controls (prompt_injection, pii_leakage, tool_permissions, human_approval, model_routing) apply to all agents and are selected via the shared jurisdiction router in `../african-regulatory/rego/jurisdiction-router.rego`. These UK national packs add jurisdiction-specific regulatory controls for `context.customer_country = "GB"`. The OPA router path (`applicable_policies` / `run_tests.sh`) returns both layers; loading a single UK ACS YAML with `AgentControl.from_path` evaluates that pack only.
 
 ## Native ACS and Rego
 
-Each YAML file is a native ACS manifest bound to its package under `rego/`.
-The shared ACS result adapter maps deny, escalate, audit, and allow outcomes to
-the runtime result contract. The jurisdiction router maps `GB` to `uk_gdpr`,
-`ico_adm`, and `fca_conduct`.
+Each YAML file is a native ACS manifest that binds **input** and **output** intervention points to its Rego package under `rego/` (tool-call / `pre_tool_call` helpers exist in Rego but are not wired in these manifests).
+The shared ACS result adapter maps deny, escalate, warn (from audit), and allow
+outcomes to the runtime result contract. The jurisdiction router maps `GB` to
+`uk_gdpr`, `ico_adm`, and `fca_conduct`.
 
 Output text is stringified before regex evaluation (Agent-OS / production Rego practice) so structured `output` cannot evade phrase rules. Transfer adequacy uses pack-owned defaults overridable only via `data.config.uk_gdpr.*` (same deployer-config pattern as African agent-safety packs). Caller-set `adequacy_covered` / `safeguards_in_place` / DPF flags on `input.params` are ignored. Default adequacy uses ICO full-adequacy ISO country/territory codes (EEA members plus Andorra, Argentina, Faroe Islands, Gibraltar, Guernsey, Isle of Man, Israel, Jersey, New Zealand, South Korea, Switzerland, Uruguay). Partial-adequacy destinations are omitted from defaults: Canada (PIPEDA scope), Japan (APPI PIHBOs), and the United States (UK Extension to EU-US DPF only). US transfers are allowed only when the platform sets both `eu_us_data_privacy_framework` and `supplementary_measures` (mirrors `agent-governance-python/agent-os/templates/policies/gdpr.yaml`). FCA autonomous trading similarly ignores caller-set `senior_manager_approved` and allows only when the platform sets `data.config.fca_conduct.senior_manager_approved`.
 
@@ -54,7 +54,10 @@ Output text is stringified before regex evaluation (Agent-OS / production Rego p
 import asyncio
 from agent_control_specification import AgentControl
 
-runtime = AgentControl.from_path("uk-gdpr-data-protection.yaml")
+# From repo root (or pass an absolute path to the YAML)
+runtime = AgentControl.from_path(
+    "examples/policies/uk-regulatory/uk-gdpr-data-protection.yaml"
+)
 result = asyncio.run(
     runtime.evaluate_intervention_point(
         "output",
@@ -73,11 +76,12 @@ To evaluate with OPA:
 # Or manually:
 opa test examples/policies/african-regulatory/rego examples/policies/uk-regulatory/rego -v
 
-# Evaluate applicable policies for GB
+# Evaluate applicable policies for GB (-i is a file path on OPA 1.x)
+printf '%s\n' '{"context": {"customer_country": "GB"}}' > /tmp/gb-input.json
 opa eval \
   -d examples/policies/african-regulatory/rego/ \
   -d examples/policies/uk-regulatory/rego/ \
-  -i '{"context": {"customer_country": "GB"}}' \
+  -i /tmp/gb-input.json \
   "data.agt_policies.router.applicable_policies"
 ```
 
