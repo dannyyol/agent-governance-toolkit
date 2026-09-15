@@ -51,10 +51,17 @@ the runtime result contract. The jurisdiction router maps `GB` to `uk_gdpr`,
 Output text is stringified before regex evaluation (Agent-OS / production Rego practice) so structured `output` cannot evade phrase rules. Transfer adequacy uses pack-owned defaults overridable only via `data.config.uk_gdpr.*` (same deployer-config pattern as African agent-safety packs). Caller-set `adequacy_covered` / `safeguards_in_place` / DPF flags on `input.params` are ignored. Default adequacy uses ICO full-adequacy ISO country/territory codes (EEA members plus Andorra, Argentina, Faroe Islands, Gibraltar, Guernsey, Isle of Man, Israel, Jersey, New Zealand, South Korea, Switzerland, Uruguay). Partial-adequacy destinations are omitted from defaults: Canada (PIPEDA scope), Japan (APPI PIHBOs), and the United States (UK Extension to EU-US DPF only). US transfers are allowed only when the platform sets both `eu_us_data_privacy_framework` and `supplementary_measures` (mirrors `agent-governance-python/agent-os/templates/policies/gdpr.yaml`). FCA autonomous trading similarly ignores caller-set `senior_manager_approved` and allows only when the platform sets `data.config.fca_conduct.senior_manager_approved`.
 
 ```python
+import asyncio
 from agent_control_specification import AgentControl
 
-runtime = AgentControl.from_path(str("uk-gdpr-data-protection.yaml"))
-result = runtime.evaluate("output", snapshot)
+runtime = AgentControl.from_path("uk-gdpr-data-protection.yaml")
+result = asyncio.run(
+    runtime.evaluate_intervention_point(
+        "output",
+        {"output": {"content": "National Insurance number AB123456C"}},
+    )
+)
+print(result.verdict.decision)
 ```
 
 To evaluate with OPA:
