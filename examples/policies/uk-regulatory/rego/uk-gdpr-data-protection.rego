@@ -9,10 +9,11 @@
 #     "context": { } }
 #
 # Config (override via data.config.uk_gdpr.* — platform/deployer only):
-#   adequacy_countries — replace illustrative default set (US is never a default)
+#   adequacy_countries — replace default full-adequacy ISO set (verify against ICO/gov.uk)
 #   eu_us_data_privacy_framework — true when org is UK Extension to EU-US DPF certified
 #   supplementary_measures — true when supplementary measures are documented
 # Caller-set input.params adequacy/DPF/safeguards flags are ignored for transfer denies.
+# Partial adequacy (CA/JP/US) is never in the default set — US is gated via platform DPF flags.
 
 package agt_policies_uk.uk_gdpr
 
@@ -44,10 +45,23 @@ pii_update_actions := {
 	"change_personal", "erase_personal_data",
 }
 
-# Illustrative UK adequacy set (verify against current gov.uk list).
-# US omitted from defaults — DPF-certified bridge only (see _us_transfer_allowed).
+# Default full-adequacy destinations (ICO adequacy regulations; ISO-3166 alpha-2).
+# Source: ICO "Is the restricted transfer covered by adequacy regulations?"
+# Use ISO codes — destination_country is a single code, so "EU"/"EEA" region
+# tokens would never match real callers (e.g. DE/FR).
+# Partial adequacy omitted from defaults:
+#   CA (PIPEDA commercial only), JP (APPI PIHBOs only), US (UK Extension to
+#   EU-US DPF only — see _us_transfer_allowed). Override via data.config.uk_gdpr.
 _default_adequacy_countries := {
-	"GB", "EU", "EEA", "JP", "KR", "CA", "NZ", "CH", "IL", "UY",
+	"GB",
+	# EU member states
+	"AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR",
+	"HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK",
+	"SI", "ES", "SE",
+	# EEA EFTA states
+	"IS", "LI", "NO",
+	# Full adequacy territories / third countries
+	"AD", "AR", "FO", "GI", "GG", "IM", "IL", "JE", "NZ", "KR", "CH", "UY",
 }
 
 adequacy_countries := s if {

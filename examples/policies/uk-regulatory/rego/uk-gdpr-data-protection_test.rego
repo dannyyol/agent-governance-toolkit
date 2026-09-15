@@ -162,7 +162,31 @@ test_deny_transfer_without_safeguards if {
 test_allow_transfer_to_adequacy_country if {
 	policy.decision == "allow" with input as {
 		"action": "export_data",
+		"params": {"destination_country": "KR"},
+		"output": "",
+	}
+}
+
+test_allow_transfer_to_eu_member_iso_code if {
+	policy.decision == "allow" with input as {
+		"action": "export_data",
+		"params": {"destination_country": "DE"},
+		"output": "",
+	}
+}
+
+test_deny_partial_adequacy_japan_by_default if {
+	policy.decision == "deny" with input as {
+		"action": "export_data",
 		"params": {"destination_country": "JP"},
+		"output": "",
+	}
+}
+
+test_deny_partial_adequacy_canada_by_default if {
+	policy.decision == "deny" with input as {
+		"action": "export_data",
+		"params": {"destination_country": "CA"},
 		"output": "",
 	}
 }
