@@ -54,7 +54,7 @@ adequacy_countries := s if {
 	s := data.config.uk_gdpr.adequacy_countries
 } else := _default_adequacy_countries
 
-# Platform-set only — mirrors agent-os/templates/policies/gdpr.yaml us_data_transfer.
+# Platform-set only — mirrors agent-governance-python/agent-os/templates/policies/gdpr.yaml us_data_transfer.
 _us_transfer_allowed if {
 	data.config.uk_gdpr.eu_us_data_privacy_framework == true
 	data.config.uk_gdpr.supplementary_measures == true
