@@ -4,7 +4,7 @@
 # UK GDPR Arts. 22A–22D (DUAA 2025 s.80) — ACS manifest (Rego enforcement in rego/).
 # Enforcing authority: Information Commissioner's Office (ICO).
 # Community-maintained governance starter policy. NOT a certified legal compliance instrument.
-agent_control_specification_version: 0.3.1-beta
+agent_control_specification_version: 0.4.0-alpha.1
 metadata:
   name: ico-automated-decisions
   version: "1.0"

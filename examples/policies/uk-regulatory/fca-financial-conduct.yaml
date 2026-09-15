@@ -4,7 +4,7 @@
 # FCA Consumer Duty (PRIN 2A) + SM&CR — ACS manifest (Rego enforcement in rego/).
 # Enforcing authority: Financial Conduct Authority (FCA).
 # Community-maintained governance starter policy. NOT a certified legal compliance instrument.
-agent_control_specification_version: 0.3.1-beta
+agent_control_specification_version: 0.4.0-alpha.1
 metadata:
   name: fca-financial-conduct
   version: "1.0"
